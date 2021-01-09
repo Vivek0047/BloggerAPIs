@@ -28,10 +28,11 @@ namespace BloggerAPIs.Controllers
 
         // GET: api/Blogs
         [HttpGet]
-        public async Task<IEnumerable<BlogModel>> GetBlogs()
+        public async Task<IEnumerable<BlogModel>> GetBlogs(int skip = 0, int take = 30)
         {
             string userId = User.Claims.First(c => c.Type == "UserID").Value;
-            var blogs = await _context.Blogs.Where(x => x.ApplicationUser.Id == userId).ToListAsync();
+            var blogs = await _context.Blogs.Where(x => x.ApplicationUser.Id == userId).Skip(skip).Take(take)
+                .ToListAsync();
             var model = blogs.Select(x => new BlogModel()
             {
                 CreatedDateTime = x.CreatedDateTime, Subject = x.Subject, Body = x.Body, Id = x.Id
@@ -40,7 +41,7 @@ namespace BloggerAPIs.Controllers
         }
 
         // GET: api/Blogs/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<BlogModel>> GetBlog(int id)
         {
             var blog = await GetUserBlog(id);
@@ -60,7 +61,7 @@ namespace BloggerAPIs.Controllers
         // PUT: api/Blogs/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> PutBlog(int id, BlogModel blog)
         {
             if (id != blog.Id)
@@ -116,7 +117,7 @@ namespace BloggerAPIs.Controllers
         }
 
         // DELETE: api/Blogs/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult<Blog>> DeleteBlog(int id)
         {
             var userBlog = await GetUserBlog(id);
