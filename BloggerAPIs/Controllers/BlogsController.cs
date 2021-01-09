@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BloggerAPIs.DDL;
 using BloggerAPIs.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
 namespace BloggerAPIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BlogsController : ControllerBase
     {
         private readonly BloggerContext _context;
@@ -41,7 +43,7 @@ namespace BloggerAPIs.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<BlogModel>> GetBlog(int id)
         {
-            var blog = await _context.Blogs.FindAsync(id);
+            var blog = await GetUserBlog(id);
 
             if (blog == null)
             {
@@ -126,21 +128,18 @@ namespace BloggerAPIs.Controllers
             _context.Blogs.Remove(userBlog);
             await _context.SaveChangesAsync();
 
-            return userBlog;
+            return Ok();
         }
 
+        //This can be moved into service
+        [NonAction]
         private async Task<Blog> GetUserBlog(int id)
         {
             try
             {
                 string userId = User.Claims.First(c => c.Type == "UserID").Value;
                 var dbBlog = await _context.Blogs.Include(x => x.ApplicationUser).FirstOrDefaultAsync(x => x.Id == id);
-                if (dbBlog.ApplicationUser.Id.Equals(userId))
-                {
-                    return dbBlog;
-                }
-
-                return null;
+                return dbBlog.ApplicationUser.Id.Equals(userId) ? dbBlog : null;
             }
             catch (Exception e)
             {
