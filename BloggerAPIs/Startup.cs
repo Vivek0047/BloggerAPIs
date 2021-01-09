@@ -53,7 +53,7 @@ namespace BloggerAPIs
                 options.Password.RequiredLength = 4;
             });
 
-            // services.AddCors();
+            services.AddCors(); // assuming we will use this project for backend and request will come through front end UI
 
             //Jwt Authentication
             var key = Encoding.UTF8.GetBytes(Configuration["ApplicationSettings:JWT_Secret"].ToString());
@@ -85,8 +85,9 @@ namespace BloggerAPIs
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
-
+            app.UseCors(builder =>
+                builder.WithOrigins(Configuration["ApplicationSettings:Client_URL"]).AllowAnyHeader().AllowAnyMethod());
+            app.UseAuthentication();
             app.UseRouting();
 
             app.UseAuthorization();

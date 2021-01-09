@@ -13,5 +13,6 @@ namespace BloggerAPIs.DDL
         [Required] public string Subject { get; set; }
         [Required] public string Body { get; set; }
         public DateTime CreatedDateTime { get; set; }
+        public ApplicationUser ApplicationUser { get; set; }
     }
 }
