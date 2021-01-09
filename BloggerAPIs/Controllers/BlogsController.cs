@@ -139,6 +139,11 @@ namespace BloggerAPIs.Controllers
             {
                 string userId = User.Claims.First(c => c.Type == "UserID").Value;
                 var dbBlog = await _context.Blogs.Include(x => x.ApplicationUser).FirstOrDefaultAsync(x => x.Id == id);
+                if (dbBlog == null)
+                {
+                    return null;
+                }
+
                 return dbBlog.ApplicationUser.Id.Equals(userId) ? dbBlog : null;
             }
             catch (Exception e)
